@@ -1,18 +1,16 @@
 package com.holidaymaker;
 
-import java.sql.DriverManager;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 
 public class Application {
     private ResultSet resultSet;
     private PreparedStatement statement;
     private Connection connect = null;
 
-    public Application() {
+    public Application() throws SQLException {
         connect();
-        new MainMenu(connect, statement);
+        new Booking(connect,statement,resultSet);
+        //new MainMenu(connect, statement);
 
     }
 

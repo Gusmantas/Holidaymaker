@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Scanner;
 
-public class User {
+public class Guest {
     private Scanner scanner = new Scanner(System.in);
 
     public void registerUser(Connection connect, PreparedStatement statement) {
