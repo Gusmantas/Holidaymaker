@@ -9,6 +9,7 @@ import java.util.Scanner;
 public class MainMenu {
     private Scanner scanner = new Scanner(System.in);
     private Guest guest = new Guest();
+    private ReservationSettings reservationSettings = new ReservationSettings();
 
     public MainMenu(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
         menu(connect, statement, resultSet);
@@ -33,14 +34,15 @@ public class MainMenu {
                     break;
 
                 case "2":
-                    guest.deleteUser(connect,statement);
+                    guest.deleteUser(connect, statement);
                     break;
 
                 case "3":
-                        Booking booking = new Booking(connect,statement, resultSet);
+                    new Reservation(connect, statement, resultSet);
                     break;
 
                 case "4":
+                    reservationOptions(connect,statement,resultSet);
                     break;
 
                 case "5":
@@ -54,7 +56,33 @@ public class MainMenu {
 
                 case "8":
                     System.out.println("Bye!");
-                    System.exit(0);
+                   isRunning = false;
+                    break;
+            }
+        }
+    }
+
+    private void reservationOptions(Connection connect, PreparedStatement statement, ResultSet resultSet) {
+        boolean optionsIsRunning = true;
+        while (optionsIsRunning) {
+            System.out.println("[1] Delete Reservation");
+            System.out.println("[2] Update Reservation");
+            System.out.println("[3] Unreserve a Room");
+            System.out.println("[4] Exit to Main Menu");
+            String userInput = scanner.nextLine();
+            switch (userInput) {
+                case "1":
+                    reservationSettings.deleteReservation(connect,statement,resultSet);
+                    break;
+
+                case "2":
+                    break;
+
+                case "3":
+                    break;
+
+                case "4":
+                    optionsIsRunning = false;
                     break;
             }
         }

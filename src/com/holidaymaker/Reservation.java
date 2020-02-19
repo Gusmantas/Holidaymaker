@@ -6,12 +6,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-public class Booking {
+public class Reservation {
     private Scanner scanner = new Scanner(System.in);
     private Guest guest = new Guest();
+    private String checkOutDate;
+    private String checkInDate;
 
-    public Booking(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
-        //registerBooking(connect, statement, resultSet);
+    public Reservation(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
+        registerBooking(connect, statement, resultSet);
         bookRoom(connect, statement, resultSet);
     }
 
@@ -25,15 +27,17 @@ public class Booking {
             System.out.println("Enter check-in date and time (yyyy-mm-dd hh:mm):  ");
             String checkIn = scanner.nextLine();
 
-            if (checkIn.compareTo("2020-06-01 00:00:00") < 0) {
-                System.out.println("Reservations are available between 2020.06.01 - 2020-07-31");
+            if (checkIn.compareTo("2020-06-01 00:00:00") <= 0) {
+                System.out.println("Reservations are available between 2020.06.01 00:00:01 - 2020-07-31 23:59:59");
+                checkInDate = checkIn;
                 continue;
 
             }
             System.out.println("Enter check-out date and time (yyyy-mm-dd hh:mm):  ");
             String checkOut = scanner.nextLine();
             if (checkOut.compareTo("2020-07-31 00:00:00") >= 0) {
-                System.out.println("Reservations are available between 2020.06.01 - 2020-07-31");
+                checkOutDate = checkOut;
+                System.out.println("Reservations are available between 2020.06.01 00:00:01 - 2020-07-31 23:59:59");
                 continue;
             }
 
@@ -47,7 +51,7 @@ public class Booking {
                     guest.registerUser(connect, statement);
 
                 } else {
-                    statement = connect.prepareStatement("INSERT INTO bookings SET guest_id = (SELECT id FROM guests WHERE first_name = ? AND phone_number = ?), checkin_date = ?, checkout_date = ? ");
+                    statement = connect.prepareStatement("INSERT INTO bookings SET guest_id = (SELECT id FROM guests WHERE first_name = ? AND phone_number = ?), checkin_date = ?, checkout_date = ?, order_datetime = NOW() ");
                     statement.setString(1, firstName);
                     statement.setString(2, phoneNumber);
                     statement.setString(3, checkIn);
@@ -65,6 +69,32 @@ public class Booking {
 
 
     public void bookRoom(Connection connect, PreparedStatement statement, ResultSet resultSet) {
+        displayAvailableRooms(connect, statement, resultSet);
+        System.out.println("Enter ID for a room you wish to book:");
+        String roomId = scanner.nextLine();
+        System.out.println("Extra assets:");
+        System.out.println("Add extra bed? 'Y' or 'N' ");
+        String extraBed = scanner.nextLine();
+        int trueOrFalse;
+        if (extraBed.toLowerCase().equals("y")) {
+            trueOrFalse = 1;
+        } else {
+            trueOrFalse = 0;
+        }
+        try {
+            statement = connect.prepareStatement("INSERT INTO booked_rooms SET room_id = ?, booking_id = (SELECT MAX(id) FROM bookings), extra_bed = ?, meals = ?");
+            statement.setString(1, roomId);
+            statement.setInt(2, trueOrFalse);
+            statement.setString(3, addMeal());
+            statement.executeUpdate();
+            System.out.println(" reservation successful! ");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void displayAvailableRooms(Connection connect, PreparedStatement statement, ResultSet resultSet) {
         System.out.println("Enter street");
         String street = scanner.nextLine();
         System.out.println("Enter city");
@@ -72,11 +102,24 @@ public class Booking {
         System.out.println("Enter country");
         String country = scanner.nextLine();
         try {
-            statement = connect.prepareStatement("SELECT room_id, room_type, room_description, room_price, max_persons_per_room FROM accommodation_info_and_rooms WHERE street = ? AND city = ? AND country = ? ");
+            String query = "SELECT room_id, room_type, room_description, room_price, max_persons_per_room \n" +
+                    "FROM accommodation_info_and_rooms \n" +
+                    "WHERE street = ? \n" +
+                    "AND city = ? \n" +
+                    "AND country = ? \n" +
+                    "AND room_id NOT IN(SELECT room_id \n" +
+                    "FROM rooms_in_bookings WHERE checkin >= ? OR checkout <= ?)";
+
+            statement = connect.prepareStatement(query);
             statement.setString(1, street);
             statement.setString(2, city);
             statement.setString(3, country);
+            statement.setString(4, checkInDate);
+            statement.setString(5, checkOutDate);
+
             resultSet = statement.executeQuery();
+            checkOutDate = null;
+            checkInDate = null;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,31 +137,6 @@ public class Booking {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-
-        System.out.println("Enter ID for a room you wish to book:");
-        String roomId = scanner.nextLine();
-        System.out.println("Extra assets:");
-        System.out.println("Add extra bed? 'Y' or 'N' ");
-        String extraBed = scanner.nextLine();
-        int trueOrFalse;
-        if (extraBed.toLowerCase().equals("y")) {
-            trueOrFalse = 1;
-
-        } else {
-            trueOrFalse = 0;
-        }
-
-
-        try {
-            statement = connect.prepareStatement("INSERT INTO booked_rooms SET room_id = ?, booking_id = (SELECT MAX(id) FROM bookings), extra_bed = ?, meals = ?");
-            statement.setString(1, roomId);
-            statement.setInt(2, trueOrFalse);
-            statement.setString(3, addMeal());
-            statement.executeUpdate();
-            System.out.println(" reservation successful! ");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -138,6 +156,6 @@ public class Booking {
                     return meal = "full-board";
             }
         }
-        return null;
+        return meal = "none";
     }
 }

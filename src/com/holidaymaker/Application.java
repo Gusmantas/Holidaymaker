@@ -9,9 +9,7 @@ public class Application {
 
     public Application() throws SQLException {
         connect();
-        new Booking(connect,statement,resultSet);
-        //new MainMenu(connect, statement);
-
+        new MainMenu(connect, statement, resultSet);
     }
 
 /*
