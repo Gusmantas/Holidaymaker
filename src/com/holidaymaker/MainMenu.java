@@ -24,7 +24,6 @@ public class MainMenu {
             System.out.println("[3] Register a booking. ");
             System.out.println("[4] Change, delete or update a booking.");
             System.out.println("[5] Search rooms. ");
-            System.out.println("[6] Find all available rooms by price . ");
             System.out.println("[7] Find all rooms by reviews");
             System.out.println("[8] Exit");
             String userInput = scanner.nextLine();
@@ -46,6 +45,7 @@ public class MainMenu {
                     break;
 
                 case "5":
+                    new SearchFilter(connect,statement,resultSet);
                     break;
 
                 case "6":
@@ -67,8 +67,7 @@ public class MainMenu {
         while (optionsIsRunning) {
             System.out.println("[1] Delete Reservation");
             System.out.println("[2] Update Reservation");
-            System.out.println("[3] Unreserve a Room");
-            System.out.println("[4] Exit to Main Menu");
+            System.out.println("[3] Exit to Main Menu");
             String userInput = scanner.nextLine();
             switch (userInput) {
                 case "1":
@@ -76,16 +75,17 @@ public class MainMenu {
                     break;
 
                 case "2":
+                    reservationSettings.updateReservation(connect,statement,resultSet);
                     break;
 
                 case "3":
+                    optionsIsRunning = false;
                     break;
 
-                case "4":
-                    optionsIsRunning = false;
+                default:
+                    System.out.println("Please enter a number between 1-3");
                     break;
             }
         }
     }
-
 }
