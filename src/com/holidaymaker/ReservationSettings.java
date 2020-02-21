@@ -1,7 +1,5 @@
 package com.holidaymaker;
 
-import org.w3c.dom.ls.LSOutput;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,12 +7,11 @@ import java.util.Scanner;
 
 public class ReservationSettings {
     private Scanner scanner = new Scanner(System.in);
-    private Guest guest = new Guest();
+    private ReservationHelper reservationHelper = new ReservationHelper();
     private int reservationId;
 
-
     public void deleteReservation(Connection connect, PreparedStatement statement, ResultSet resultSet) {
-        guest.findGuestBookings(connect, statement, resultSet);
+        reservationHelper.findGuestBookings(connect, statement, resultSet);
         System.out.println("Select reservation ID you wish to remove: ");
         int removeReservation = Integer.parseInt(scanner.nextLine());
         try {
@@ -23,7 +20,7 @@ public class ReservationSettings {
             statement.executeUpdate();
             System.out.println("Reservation successfully removed!");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("There was an error, try again");
         }
     }
 
@@ -60,48 +57,13 @@ public class ReservationSettings {
                         System.out.println("Reservations are available between 2020.06.01 00:00:01 - 2020-07-31 23:59:59");
                         break;
                     }
-                    executeUpdate(connect,statement,"UPDATE bookings SET checkout_date = ? WHERE id =" + reservationId, newCheckOut);
+                    executeUpdate(connect, statement, "UPDATE bookings SET checkout_date = ? WHERE id =" + reservationId, newCheckOut);
                     break;
                 case "3":
-                    System.out.println("Add extra bed? 'Y' or 'N' ");
-                    String extraBed = scanner.nextLine();
-                    int trueOrFalse;
-                    if (extraBed.toLowerCase().equals("y")) {
-                        trueOrFalse = 1;
-                    } else {
-                        trueOrFalse = 0;
-                    }
-                    try {
-                        statement = connect.prepareStatement("UPDATE booked_rooms SET extra_bed = ? WHERE booking_id =" + reservationId);
-                        statement.setInt(1, trueOrFalse);
-                        statement.executeUpdate();
-                        System.out.println("updated successfully!");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    addOrRemoveBed(connect, statement);
                     break;
                 case "4":
-                    System.out.println("[1] to add half-board");
-                    System.out.println("[2] to add full-board");
-                    System.out.println("[3] do not add any meals");
-                    String fullOrHalfBoard = scanner.nextLine();
-                    String meal = null;
-                    switch (fullOrHalfBoard) {
-                        case "1":
-                            meal = "half-board";
-                            break;
-
-                        case "2":
-                            meal = "full-board";
-                            break;
-                        case "3":
-                            meal = "none";
-                            break;
-                        default:
-                            System.out.println("Please enter a number between 1-3");
-                            break;
-                    }
-                    executeUpdate(connect,statement,"UPDATE booked_rooms SET meals = ? WHERE booking_id =" + reservationId, meal);
+                    addOrRemoveMeals(connect, statement);
                     break;
                 case "5":
                     isRunning = false;
@@ -113,6 +75,49 @@ public class ReservationSettings {
         }
     }
 
+    private void addOrRemoveMeals(Connection connect, PreparedStatement statement) {
+        System.out.println("[1] to add half-board");
+        System.out.println("[2] to add full-board");
+        System.out.println("[3] do not add any meals");
+        String fullOrHalfBoard = scanner.nextLine();
+        String meal = null;
+        switch (fullOrHalfBoard) {
+            case "1":
+                meal = "half-board";
+                break;
+
+            case "2":
+                meal = "full-board";
+                break;
+            case "3":
+                meal = "none";
+                break;
+            default:
+                System.out.println("Please enter a number between 1-3");
+                break;
+        }
+        executeUpdate(connect, statement, "UPDATE booked_rooms SET meals = ? WHERE booking_id =" + reservationId, meal);
+    }
+
+    private void addOrRemoveBed(Connection connect, PreparedStatement statement) {
+        System.out.println("Add extra bed? 'Y' or 'N' ");
+        String extraBed = scanner.nextLine();
+        int trueOrFalse;
+        if (extraBed.toLowerCase().equals("y")) {
+            trueOrFalse = 1;
+        } else {
+            trueOrFalse = 0;
+        }
+        try {
+            statement = connect.prepareStatement("UPDATE booked_rooms SET extra_bed = ? WHERE booking_id =" + reservationId);
+            statement.setInt(1, trueOrFalse);
+            statement.executeUpdate();
+            System.out.println("updated successfully!");
+        } catch (Exception e) {
+            System.out.println("There was an error, try again");
+        }
+    }
+
     private void executeUpdate(Connection connect, PreparedStatement statement, String query, String setValue) {
         try {
             statement = connect.prepareStatement(query);
@@ -120,12 +125,12 @@ public class ReservationSettings {
             statement.executeUpdate();
             System.out.println("updated successfully!");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("There was an error, try again");
         }
     }
 
     public void displayReservation(Connection connect, PreparedStatement statement, ResultSet resultSet) {
-        guest.findGuestBookings(connect, statement, resultSet);
+        reservationHelper.findGuestBookings(connect, statement, resultSet);
         System.out.println("Select reservation ID you wish to update: ");
         int updateReservation = Integer.parseInt(scanner.nextLine());
         reservationId = updateReservation;
@@ -146,7 +151,7 @@ public class ReservationSettings {
                 System.out.println(row);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("There was an error, try again");
         }
     }
 }

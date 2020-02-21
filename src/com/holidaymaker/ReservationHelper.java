@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Scanner;
 
-public class Guest {
+public class ReservationHelper {
     private Scanner scanner = new Scanner(System.in);
 
     public void registerUser(Connection connect, PreparedStatement statement) {
@@ -22,7 +22,7 @@ public class Guest {
             statement.setString(3, phoneNumber);
             statement.executeUpdate();
             String fullName = firstName + " " + lastName;
-            System.out.println(fullName + " registered successfully! ");
+            System.out.println(fullName + "registered successfully! ");
         } catch (Exception e) {
             e.printStackTrace();
         }

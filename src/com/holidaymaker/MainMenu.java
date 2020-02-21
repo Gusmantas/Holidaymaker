@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class MainMenu {
     private Scanner scanner = new Scanner(System.in);
-    private Guest guest = new Guest();
+    private ReservationHelper reservationHelper = new ReservationHelper();
     private ReservationSettings reservationSettings = new ReservationSettings();
 
     public MainMenu(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
@@ -29,11 +29,11 @@ public class MainMenu {
             String userInput = scanner.nextLine();
             switch (userInput) {
                 case "1":
-                    guest.registerUser(connect, statement);
+                    reservationHelper.registerUser(connect, statement);
                     break;
 
                 case "2":
-                    guest.deleteUser(connect, statement);
+                    reservationHelper.deleteUser(connect, statement);
                     break;
 
                 case "3":
