@@ -8,9 +8,9 @@ import java.util.Scanner;
 
 public class MainMenu {
     private Scanner scanner = new Scanner(System.in);
-    private ReservationHelper reservationHelper = new ReservationHelper();
+    private GuestSettingsHelper guestSettingsHelper = new GuestSettingsHelper();
     private ReservationSettings reservationSettings = new ReservationSettings();
-
+private SearchFilter searchFilter = new SearchFilter();
     public MainMenu(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
         menu(connect, statement, resultSet);
     }
@@ -21,23 +21,23 @@ public class MainMenu {
             System.out.println("Welcome! Please, choose an option: ");
             System.out.println("[1] Register a user. ");
             System.out.println("[2] Delete a user. ");
-            System.out.println("[3] Register a booking. ");
+            System.out.println("[3] Search rooms and make a reservation");
             System.out.println("[4] Change, delete or update a booking.");
-            System.out.println("[5] Search rooms. ");
+            System.out.println("[5] See all reservations ");
             System.out.println("[7] Find all rooms by reviews");
             System.out.println("[8] Exit");
             String userInput = scanner.nextLine();
             switch (userInput) {
                 case "1":
-                    reservationHelper.registerUser(connect, statement);
+                    guestSettingsHelper.registerUser(connect, statement);
                     break;
 
                 case "2":
-                    reservationHelper.deleteUser(connect, statement);
+                    guestSettingsHelper.deleteUser(connect, statement);
                     break;
 
                 case "3":
-                    new Reservation(connect, statement, resultSet);
+                    searchMenu(connect,statement,resultSet);
                     break;
 
                 case "4":
@@ -45,7 +45,7 @@ public class MainMenu {
                     break;
 
                 case "5":
-                    new SearchFilter(connect,statement,resultSet);
+
                     break;
 
                 case "6":
@@ -84,6 +84,26 @@ public class MainMenu {
 
                 default:
                     System.out.println("Please enter a number between 1-3");
+                    break;
+            }
+        }
+    }
+
+    private void searchMenu(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
+        boolean isRunning = true;
+        while (isRunning) {
+            System.out.println("[1] Begin search");
+            System.out.println("[2] Exit");
+            String beginSearchOrExit = scanner.nextLine();
+            switch (beginSearchOrExit) {
+                case "1":
+                    searchFilter.searchRoomsAndAccommodations(connect, statement, resultSet);
+                    break;
+                case "2":
+                    isRunning = false;
+                    break;
+                default:
+                    System.out.println("Please enter a number between 1-2");
                     break;
             }
         }

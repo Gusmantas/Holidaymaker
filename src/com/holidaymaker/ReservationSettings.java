@@ -7,11 +7,11 @@ import java.util.Scanner;
 
 public class ReservationSettings {
     private Scanner scanner = new Scanner(System.in);
-    private ReservationHelper reservationHelper = new ReservationHelper();
+    private GuestSettingsHelper guestSettingsHelper = new GuestSettingsHelper();
     private int reservationId;
 
     public void deleteReservation(Connection connect, PreparedStatement statement, ResultSet resultSet) {
-        reservationHelper.findGuestBookings(connect, statement, resultSet);
+        guestSettingsHelper.findGuestBookings(connect, statement, resultSet);
         System.out.println("Select reservation ID you wish to remove: ");
         int removeReservation = Integer.parseInt(scanner.nextLine());
         try {
@@ -130,7 +130,7 @@ public class ReservationSettings {
     }
 
     public void displayReservation(Connection connect, PreparedStatement statement, ResultSet resultSet) {
-        reservationHelper.findGuestBookings(connect, statement, resultSet);
+        guestSettingsHelper.findGuestBookings(connect, statement, resultSet);
         System.out.println("Select reservation ID you wish to update: ");
         int updateReservation = Integer.parseInt(scanner.nextLine());
         reservationId = updateReservation;
