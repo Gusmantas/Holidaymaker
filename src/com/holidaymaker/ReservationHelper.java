@@ -3,11 +3,12 @@ package com.holidaymaker;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class ReservationHelper {
     private Scanner scanner = new Scanner(System.in);
-    private GuestSettingsHelper guestSettingsHelper = new GuestSettingsHelper();
+    private SearchFilter searchFilter = new SearchFilter();
 
     public Double setDistance(String enterDistance) { //Asks for specific distance to be set when searching rooms
         double desiredDistance;
@@ -29,36 +30,41 @@ public class ReservationHelper {
         return yesNoOrNull = "no";
     }
 
-    public Integer addBed() {
-        System.out.println("Extra assets:");
-        System.out.println("Add extra bed? 'Y' or 'N' ");
-        String extraBed = scanner.nextLine();
-        int trueOrFalse;
-        if (extraBed.toLowerCase().equals("y")) {
-            return trueOrFalse = 1;
-        }
-        return trueOrFalse = 0;
-    }
-
-    public String addMeal() {
-        System.out.println("Add meals? 'Y' or 'N'");
-        String addMeals = scanner.nextLine();
-        String meal = null;
-        if (addMeals.toLowerCase().equals("y")) {
-            System.out.println("[1] to add half-board");
-            System.out.println("[2] to add full-board");
-            String fullOrHalfBoard = scanner.nextLine();
-            switch (fullOrHalfBoard) {
-                case "1":
-                    return meal = "half-board";
-                case "2":
-                    return meal = "full-board";
-                default:
-                    System.out.println("Wrong input. Enter either '1' or '2'");
-                    break;
+    public void printRoomInformation(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
+        try {
+            if (!resultSet.isBeforeFirst()) {
+                System.out.println("There are no rooms available. Search again: ");
+                searchFilter.searchRoomsAndAccommodations(connect, statement, resultSet);
             }
+            while (resultSet.next()) {
+                String row =
+                        "__________________________________________________________________________________________\n" +
+                                " Accommodation ID: " + resultSet.getString("accommodation_id") + " \n"
+                                + " Street: " + resultSet.getString("street") + " \n"
+                                + " City: " + resultSet.getString("city") + "\n"
+                                + " Country: " + resultSet.getString("country") + "\n"
+                                + " Extra Bed Price: " + resultSet.getString("extra_bed_price") + "\n"
+                                + " Half-Board Price: " + resultSet.getString("half_board_price") + "\n"
+                                + " Full-Board Price: " + resultSet.getString("full_board_price") + "\n"
+                                + " Pool: " + resultSet.getString("pool") + "\n"
+                                + " Evening Events: " + resultSet.getString("evening_events") + "\n"
+                                + " Child Activities: " + resultSet.getString("child_activities") + "\n"
+                                + " Restaurant: " + resultSet.getString("restaurant") + "\n"
+                                + " Distance To Beach: " + resultSet.getString("distance_to_beach") + "\n"
+                                + " Distance To Centrum: " + resultSet.getString("distance_to_centrum") + "\n"
+                                + " Room Type: " + resultSet.getString("room_type") + "\n"
+                                + " Max Persons Per Room: " + resultSet.getString("max_persons_per_room") + "\n"
+                                + " Room Price: " + resultSet.getString("room_price") + "\n"
+                                + " Room Description: " + resultSet.getString("room_description") + "\n"
+                                + " Average Rating: " + resultSet.getString("stars") + "\n"
+                                + " Review: " + resultSet.getString("review") + "\n"
+                                + " Room ID: " + resultSet.getString("room_id") + "\n"
+                                + "______________________________________________________________________________________";
+                System.out.println(row);
+            }
+        } catch (Exception e) {
+            System.out.println("Error occurred, please try again.");
         }
-        return meal = "none";
     }
 
     public String sortBy() {
@@ -103,7 +109,7 @@ public class ReservationHelper {
                         " Room Type: " + resultSet.getString("type") + "\n" +
                         " Extra Bed: " + resultSet.getString("extra_bed") + "\n" +
                         " Meals: " + resultSet.getString("meals") + "\n" +
-                        " Room Price: " + resultSet.getString("room_price") + "\n" +
+                        " Room Price: " + resultSet.getString("room_price") + "$\n" +
                         " First name: " + resultSet.getString("first_name") + "\n" +
                         " Last name: " + resultSet.getString("last_name") + "\n" +
                         " Phone number: " + resultSet.getString("phone_number");

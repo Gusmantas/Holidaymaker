@@ -129,7 +129,7 @@ public class ReservationSettings {
         }
     }
 
-    public void displayReservation(Connection connect, PreparedStatement statement, ResultSet resultSet) {
+    private void displayReservation(Connection connect, PreparedStatement statement, ResultSet resultSet) {
         guestSettingsHelper.findGuestBookings(connect, statement, resultSet);
         System.out.println("Select reservation ID you wish to update: ");
         int updateReservation = Integer.parseInt(scanner.nextLine());

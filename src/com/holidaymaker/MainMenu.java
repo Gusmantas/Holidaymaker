@@ -26,11 +26,12 @@ public class MainMenu {
             System.out.println("[3] Search rooms and make a reservation");
             System.out.println("[4] Change, delete or update a booking.");
             System.out.println("[5] See reservations ");
-            System.out.println("[6] Exit");
+            System.out.println("[6] All Registered Users ");
+            System.out.println("[7] Exit");
             String userInput = scanner.nextLine();
             switch (userInput) {
                 case "1":
-                    guestSettingsHelper.registerUser(connect, statement);
+                    guestSettingsHelper.registerUser(connect, statement, resultSet);
                     break;
 
                 case "2":
@@ -50,6 +51,11 @@ public class MainMenu {
                     break;
 
                 case "6":
+                    guestSettingsHelper.printAllRegisteredUsers(connect, statement, resultSet);
+                    break;
+
+
+                case "7":
                     System.out.println("Bye!");
                     isRunning = false;
                     break;
