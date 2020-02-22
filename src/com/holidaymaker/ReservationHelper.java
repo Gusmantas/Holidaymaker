@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 public class ReservationHelper {
     private Scanner scanner = new Scanner(System.in);
-    private SearchFilter searchFilter = new SearchFilter();
 
     public Double setDistance(String enterDistance) { //Asks for specific distance to be set when searching rooms
         double desiredDistance;
@@ -33,8 +32,7 @@ public class ReservationHelper {
     public void printRoomInformation(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
         try {
             if (!resultSet.isBeforeFirst()) {
-                System.out.println("There are no rooms available. Search again: ");
-                searchFilter.searchRoomsAndAccommodations(connect, statement, resultSet);
+                System.out.println("There are no rooms available.");
             }
             while (resultSet.next()) {
                 String row =

@@ -8,7 +8,6 @@ import java.util.Scanner;
 public class GuestSettingsHelper {
     private Scanner scanner = new Scanner(System.in);
 
-
     public void registerUser(Connection connect, PreparedStatement statement, ResultSet resultSet) {
         System.out.println("Enter first name: ");
         String firstName = scanner.nextLine();
@@ -61,11 +60,11 @@ public class GuestSettingsHelper {
                 System.out.println("Guest was not found.");
             }
             while (resultSet.next()) {
-                String row = "Booking ID: " + resultSet.getString("booking_id") +"\n"
-                        + " Order Date: " + resultSet.getString("order_datetime") +"\n"
-                        + " Check-In Date: " + resultSet.getString("checkin_date") +"\n"
-                        + " Check-Out Date: " + resultSet.getString("checkout_date") +"\n"
-                        + " Room Type: " + resultSet.getString("type") +"\n"
+                String row = "Booking ID: " + resultSet.getString("booking_id") + "\n"
+                        + " Order Date: " + resultSet.getString("order_datetime") + "\n"
+                        + " Check-In Date: " + resultSet.getString("checkin_date") + "\n"
+                        + " Check-Out Date: " + resultSet.getString("checkout_date") + "\n"
+                        + " Room Type: " + resultSet.getString("type") + "\n"
                         + " Room Price: " + resultSet.getString("room_price");
                 System.out.println(row);
                 System.out.println("------------------------------------------------------------");
@@ -90,7 +89,7 @@ public class GuestSettingsHelper {
         }
     }
 
-    public void printAllRegisteredUsers(Connection connect, PreparedStatement statement, ResultSet resultSet){
+    public void printAllRegisteredUsers(Connection connect, PreparedStatement statement, ResultSet resultSet) {
         try {
             statement = connect.prepareStatement("SELECT first_name, last_name, phone_number FROM guests");
             resultSet = statement.executeQuery();

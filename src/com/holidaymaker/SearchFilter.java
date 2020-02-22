@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 
 public class SearchFilter {
@@ -70,6 +73,7 @@ public class SearchFilter {
                 resultSet = statement.executeQuery();
                 reservationHelper.printRoomInformation(connect, statement, resultSet);
             } catch (Exception e) {
+                e.printStackTrace();
                 System.out.println("Error occurred, please try again.");
             }
             System.out.println("Do you wish to proceed with this order? <ENTER>: yes, 'N': no");
@@ -78,12 +82,12 @@ public class SearchFilter {
                 isRunning = false;
             } else {
                 bookRoom(connect, statement, resultSet);
-            isRunning = false;
+                isRunning = false;
             }
         }
     }
 
-    public Integer addBed() {
+    private Integer addBed() {
         System.out.println("Extra assets:");
         System.out.println("Add extra bed? 'Y' or 'N' ");
         String extraBed = scanner.nextLine();
@@ -105,7 +109,10 @@ public class SearchFilter {
         statement.setInt(2, addBed());
         statement.setString(3, addMeal());
         statement.executeUpdate();
-        double totalSum = bedPrice + halfBoardPrice + fullBoardPrice + roomPrice;
+        LocalDateTime checkIn = LocalDateTime.parse(checkInDate, DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm"));
+        LocalDateTime checkout = LocalDateTime.parse(checkOutDate, DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm"));
+        double numOfDays = ChronoUnit.DAYS.between(checkIn, checkout);
+        double totalSum = (bedPrice + halfBoardPrice + fullBoardPrice + roomPrice) * numOfDays;
         System.out.printf("Total price: %.2f \n", totalSum);
         System.out.println("Reservation successful! ");
         bedPrice = 0;
@@ -126,7 +133,7 @@ public class SearchFilter {
         }
     }
 
-    public String addMeal(){
+    private String addMeal() {
         System.out.println("Add meals? 'Y' or 'N'");
         String addMeals = scanner.nextLine();
         String meal = null;
@@ -150,7 +157,6 @@ public class SearchFilter {
         halfBoardPrice = 0;
         return meal = "none";
     }
-
 
     private void registerBooking(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
         System.out.println("To make a reservation, enter client first name: ");
