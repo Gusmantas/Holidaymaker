@@ -22,7 +22,7 @@ public class GuestSettingsHelper {
             statement.setString(3, phoneNumber);
             statement.executeUpdate();
             String fullName = firstName + " " + lastName;
-            System.out.println(fullName + "registered successfully! ");
+            System.out.println(fullName + " registered successfully! ");
         } catch (Exception e) {
             e.printStackTrace();
         }

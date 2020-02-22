@@ -10,7 +10,9 @@ public class MainMenu {
     private Scanner scanner = new Scanner(System.in);
     private GuestSettingsHelper guestSettingsHelper = new GuestSettingsHelper();
     private ReservationSettings reservationSettings = new ReservationSettings();
-private SearchFilter searchFilter = new SearchFilter();
+    private SearchFilter searchFilter = new SearchFilter();
+    private ReservationHelper reservationHelper = new ReservationHelper();
+
     public MainMenu(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
         menu(connect, statement, resultSet);
     }
@@ -23,9 +25,8 @@ private SearchFilter searchFilter = new SearchFilter();
             System.out.println("[2] Delete a user. ");
             System.out.println("[3] Search rooms and make a reservation");
             System.out.println("[4] Change, delete or update a booking.");
-            System.out.println("[5] See all reservations ");
-            System.out.println("[7] Find all rooms by reviews");
-            System.out.println("[8] Exit");
+            System.out.println("[5] See reservations ");
+            System.out.println("[6] Exit");
             String userInput = scanner.nextLine();
             switch (userInput) {
                 case "1":
@@ -37,26 +38,47 @@ private SearchFilter searchFilter = new SearchFilter();
                     break;
 
                 case "3":
-                    searchMenu(connect,statement,resultSet);
+                    searchMenu(connect, statement, resultSet);
                     break;
 
                 case "4":
-                    reservationOptions(connect,statement,resultSet);
+                    reservationOptions(connect, statement, resultSet);
                     break;
 
                 case "5":
-
+                    seeReservations(connect, statement, resultSet);
                     break;
 
                 case "6":
-                    break;
-
-                case "7":
-                    break;
-
-                case "8":
                     System.out.println("Bye!");
-                   isRunning = false;
+                    isRunning = false;
+                    break;
+            }
+        }
+    }
+
+    private void seeReservations(Connection connect, PreparedStatement statement, ResultSet resultSet) {
+        boolean isMenuOn = true;
+        while (isMenuOn) {
+            System.out.println("[1] See all reservations");
+            System.out.println("[2] See reservations by specific guest");
+            System.out.println("[3] Exit to main menu");
+            String userInput = scanner.nextLine();
+            switch (userInput) {
+                case "1":
+                    reservationHelper.getAllReservations(connect, statement, resultSet);
+                    break;
+
+                case "2":
+                    guestSettingsHelper.findGuestBookings(connect, statement, resultSet);
+                    break;
+
+                case "3":
+                    isMenuOn = false;
+                    break;
+
+                default:
+                    System.out.println("Please enter a number between 1-3");
                     break;
             }
         }
@@ -71,11 +93,11 @@ private SearchFilter searchFilter = new SearchFilter();
             String userInput = scanner.nextLine();
             switch (userInput) {
                 case "1":
-                    reservationSettings.deleteReservation(connect,statement,resultSet);
+                    reservationSettings.deleteReservation(connect, statement, resultSet);
                     break;
 
                 case "2":
-                    reservationSettings.updateReservation(connect,statement,resultSet);
+                    reservationSettings.updateReservation(connect, statement, resultSet);
                     break;
 
                 case "3":
@@ -99,9 +121,11 @@ private SearchFilter searchFilter = new SearchFilter();
                 case "1":
                     searchFilter.searchRoomsAndAccommodations(connect, statement, resultSet);
                     break;
+
                 case "2":
                     isRunning = false;
                     break;
+
                 default:
                     System.out.println("Please enter a number between 1-2");
                     break;
