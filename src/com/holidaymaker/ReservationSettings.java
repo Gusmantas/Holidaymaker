@@ -15,7 +15,7 @@ public class ReservationSettings {
         System.out.println("Select reservation ID you wish to remove: ");
         int removeReservation = Integer.parseInt(scanner.nextLine());
         try {
-            statement = connect.prepareStatement("DELETE FROM bookings WHERE id = ?");
+            statement = connect.prepareStatement("DELETE FROM booked_rooms WHERE booking_id = ?");
             statement.setInt(1, removeReservation);
             statement.executeUpdate();
             System.out.println("Reservation successfully removed!");
