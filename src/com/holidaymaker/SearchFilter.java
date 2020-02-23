@@ -162,7 +162,6 @@ public class SearchFilter {
                     statement.setString(3, checkInDate);
                     statement.setString(4, checkOutDate);
                     statement.executeUpdate();
-                }
                 getPrices(connect, statement, resultSet, roomId);
                 statement = connect.prepareStatement("INSERT INTO booked_rooms SET room_id = ?, booking_id = (SELECT MAX(id) FROM bookings), extra_bed = ?, meals = ?");
                 statement.setString(1, roomId);
@@ -170,6 +169,7 @@ public class SearchFilter {
                 statement.setString(3, addMeal);
                 statement.executeUpdate();
                 calculatePrice();
+                }
                 break;
             } catch (Exception ex) {
                 System.out.println("There was an error, try again.");
@@ -183,7 +183,7 @@ public class SearchFilter {
         LocalDateTime checkout = LocalDateTime.parse(checkOutDate, DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm"));
         double numOfDays = ChronoUnit.DAYS.between(checkIn, checkout);
         double totalSum = (bedPrice + halfBoardPrice + fullBoardPrice + roomPrice) * numOfDays;
-        System.out.printf("Total price: %.2f \n", totalSum);
+        System.out.printf("Total price: %.2fSEK \n", totalSum);
         System.out.println("Reservation successful! ");
         bedPrice = 0;
         halfBoardPrice = 0;
