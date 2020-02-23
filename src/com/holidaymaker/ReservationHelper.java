@@ -41,9 +41,9 @@ public class ReservationHelper {
                                 + " Street: " + resultSet.getString("street") + " \n"
                                 + " City: " + resultSet.getString("city") + "\n"
                                 + " Country: " + resultSet.getString("country") + "\n"
-                                + " Extra Bed Price: " + resultSet.getString("extra_bed_price") + "\n"
-                                + " Half-Board Price: " + resultSet.getString("half_board_price") + "\n"
-                                + " Full-Board Price: " + resultSet.getString("full_board_price") + "\n"
+                                + " Extra Bed Price: " + resultSet.getString("extra_bed_price") + "SEK" + "\n"
+                                + " Half-Board Price: " + resultSet.getString("half_board_price") + "SEK" + "\n"
+                                + " Full-Board Price: " + resultSet.getString("full_board_price") + "SEK" + "\n"
                                 + " Pool: " + resultSet.getString("pool") + "\n"
                                 + " Evening Events: " + resultSet.getString("evening_events") + "\n"
                                 + " Child Activities: " + resultSet.getString("child_activities") + "\n"
@@ -52,7 +52,7 @@ public class ReservationHelper {
                                 + " Distance To Centrum: " + resultSet.getString("distance_to_centrum") + "\n"
                                 + " Room Type: " + resultSet.getString("room_type") + "\n"
                                 + " Max Persons Per Room: " + resultSet.getString("max_persons_per_room") + "\n"
-                                + " Room Price: " + resultSet.getString("room_price") + "\n"
+                                + " Room Price: " + resultSet.getString("room_price") + "SEK" + "\n"
                                 + " Room Description: " + resultSet.getString("room_description") + "\n"
                                 + " Average Rating: " + resultSet.getString("stars") + "\n"
                                 + " Review: " + resultSet.getString("review") + "\n"
@@ -61,12 +61,13 @@ public class ReservationHelper {
                 System.out.println(row);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Error occurred, please try again.");
         }
     }
 
-    public String sortBy() {
-        System.out.println("[1] Sort by room price (low-to-high");
+    public String sortFilteredSearch() {
+        System.out.println("[1] Sort by room price (low-to-high)");
         System.out.println("[2] Sort by accommodation ratings (high-to-low)");
         System.out.println("[3] Skip");
         String sortBy = scanner.nextLine();
@@ -92,6 +93,27 @@ public class ReservationHelper {
         return query;
     }
 
+    public String sortUnfilteredSearch(){
+        System.out.println("[1] Sort by room price (low-to-high)");
+        System.out.println("[2] Sort by accommodation ratings (high-to-low)");
+        System.out.println("[3] Skip");
+        String sortBy = scanner.nextLine();
+        String query = "SELECT * FROM accommodations_with_reviews\n" +
+                "WHERE max_persons_per_room = ?\n" +
+                "AND room_id  IN(SELECT id FROM all_rooms\n" +
+                "WHERE checkin IS NULL OR checkout IS NULL \n" +
+                "OR checkin  NOT BETWEEN ? AND ? \n" +
+                "AND checkout NOT BETWEEN ? AND ?\n" +
+                "AND ? NOT BETWEEN checkin AND checkout\n" +
+                "AND ? NOT BETWEEN checkin AND checkout)\n";
+        if (sortBy.equals("1")) {
+            return query = query + "ORDER BY room_price ASC";
+        } else if (sortBy.equals("2")) {
+            return query = query + "ORDER BY stars DESC";
+        }
+        return query;
+    }
+
     public void getAllReservations(Connection connect, PreparedStatement statement, ResultSet resultSet) {
         try {
             statement = connect.prepareStatement(" SELECT * FROM guest_info_and_bookings");
@@ -100,17 +122,19 @@ public class ReservationHelper {
                 System.out.println("There are no bookings in the system yet.");
             }
             while (resultSet.next()) {
-                String row = " Reservation ID: " + resultSet.getString("booking_id") + "\n" +
+                String row = "__________________________________________________________________________" + "\n" +
+                        " Reservation ID: " + resultSet.getString("booking_id") + "\n" +
                         " Reservation Date: " + resultSet.getString("order_datetime") + "\n" +
                         " Check-In Date: " + resultSet.getString("checkin_date") + "\n" +
                         " Check-Out Date: " + resultSet.getString("checkout_date") + "\n" +
                         " Room Type: " + resultSet.getString("type") + "\n" +
                         " Extra Bed: " + resultSet.getString("extra_bed") + "\n" +
                         " Meals: " + resultSet.getString("meals") + "\n" +
-                        " Room Price: " + resultSet.getString("room_price") + "$\n" +
+                        " Room Price: " + resultSet.getString("room_price")+ "SEK" + "$\n" +
                         " First name: " + resultSet.getString("first_name") + "\n" +
                         " Last name: " + resultSet.getString("last_name") + "\n" +
-                        " Phone number: " + resultSet.getString("phone_number");
+                        " Phone number: " + resultSet.getString("phone_number") + "\n" +
+                        "__________________________________________________________________________";
                 System.out.println(row);
             }
         } catch (Exception e) {

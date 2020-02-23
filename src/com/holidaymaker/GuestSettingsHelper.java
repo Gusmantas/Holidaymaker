@@ -46,31 +46,35 @@ public class GuestSettingsHelper {
     }
 
     public void findGuestBookings(Connection connect, PreparedStatement statement, ResultSet resultSet) {
-        System.out.println("Enter guest's first name:");
-        String firstName = scanner.nextLine();
-        System.out.println("Enter guest's phone number: ");
-        String phoneNumber = scanner.nextLine();
-        checkIfGuestIsPresent(connect, statement, resultSet, firstName, phoneNumber);
-        try {
-            statement = connect.prepareStatement("SELECT * FROM guest_bookings WHERE guest_id = (SELECT id FROM guests WHERE first_name = ? AND phone_number = ?)");
-            statement.setString(1, firstName.toLowerCase());
-            statement.setString(2, phoneNumber);
-            resultSet = statement.executeQuery();
-            if (!resultSet.isBeforeFirst()) {
-                System.out.println("Guest was not found.");
+        while(true) {
+            System.out.println("Enter guest's first name:");
+            String firstName = scanner.nextLine();
+            System.out.println("Enter guest's phone number: ");
+            String phoneNumber = scanner.nextLine();
+            checkIfGuestIsPresent(connect, statement, resultSet, firstName, phoneNumber);
+            try {
+                statement = connect.prepareStatement("SELECT * FROM guest_bookings WHERE guest_id = (SELECT id FROM guests WHERE first_name = ? AND phone_number = ?)");
+                statement.setString(1, firstName.toLowerCase());
+                statement.setString(2, phoneNumber);
+                resultSet = statement.executeQuery();
+                if (!resultSet.isBeforeFirst()) {
+                    System.out.println("No reservations were found");
+                    break;
+                }
+                while (resultSet.next()) {
+                    String row = "Booking ID: " + resultSet.getString("booking_id") + "\n"
+                            + " Order Date: " + resultSet.getString("order_datetime") + "\n"
+                            + " Check-In Date: " + resultSet.getString("checkin_date") + "\n"
+                            + " Check-Out Date: " + resultSet.getString("checkout_date") + "\n"
+                            + " Room Type: " + resultSet.getString("type") + "\n"
+                            + " Room Price: " + resultSet.getString("room_price") + "SEK";
+                    System.out.println(row);
+                    System.out.println("------------------------------------------------------------");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-            while (resultSet.next()) {
-                String row = "Booking ID: " + resultSet.getString("booking_id") + "\n"
-                        + " Order Date: " + resultSet.getString("order_datetime") + "\n"
-                        + " Check-In Date: " + resultSet.getString("checkin_date") + "\n"
-                        + " Check-Out Date: " + resultSet.getString("checkout_date") + "\n"
-                        + " Room Type: " + resultSet.getString("type") + "\n"
-                        + " Room Price: " + resultSet.getString("room_price");
-                System.out.println(row);
-                System.out.println("------------------------------------------------------------");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            break;
         }
     }
 
@@ -99,7 +103,7 @@ public class GuestSettingsHelper {
             while (resultSet.next()) {
                 String row = "First Name: " + resultSet.getString("first_name")
                         + " | Last Name: " + resultSet.getString("last_name")
-                        + " 2| Phone Number: " + resultSet.getString("phone_number");
+                        + " | Phone Number: " + resultSet.getString("phone_number");
                 System.out.println(row);
                 System.out.println("------------------------------------------------------------");
             }

@@ -14,9 +14,9 @@ This because of Java code - now you can enter names in console with lowercase, u
 or both without it crashing.
 * Also added SQL diagram in SQL folder on github, so you can see how i thought when i created
 MySQL database structure.
-* Sometimes room search in the app returns very little results. This is because I might have needed to choose TINYINT
- instead of ENUM in asset_profile table, because when filtering by available pool, evening activities etc - many rooms stay hidden, since
- i have profile set to accommodation. Tried to make menu where you can either skip filtering by assets or not, but resulted 
- stackOverflow instead. Maybe you can give me a couple of tips how to surpass this, once we meet in school?  
+* Class searchFilter is a bit too big. This is because I've made filtered search and non-filtered search. This is due to 
+very few results being returned when filtering search by accommodation assets (I believe it happens because I've chosen to use ENUM in database 
+asset_profile table). If you choose to not to filter search by assets, when searching for available rooms, you should be able to get
+many results.
 * "Delete Guest" choice in main menu completely removes guest, and his/hers bookings. ("Cascade", "cascade" in database foreign keys.)
 * Database probably has unnecessary views, but since all of them are related in one way or another - I've chosen not to remove them. 

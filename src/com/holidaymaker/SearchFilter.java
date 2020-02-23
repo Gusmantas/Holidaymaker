@@ -13,12 +13,12 @@ public class SearchFilter {
     private Scanner scanner = new Scanner(System.in);
     private String checkOutDate;
     private String checkInDate;
-    private GuestSettingsHelper guestSettingsHelper = new GuestSettingsHelper();
     private ReservationHelper reservationHelper = new ReservationHelper();
     private double bedPrice;
     private double halfBoardPrice;
     private double fullBoardPrice;
     private double roomPrice;
+    private int numOfPeople;
 
     public void searchRoomsAndAccommodations(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
         boolean isRunning = true;
@@ -42,41 +42,27 @@ public class SearchFilter {
                 }
                 System.out.println("Enter number of people (there are rooms up to 9 persons): ");
                 int people = Integer.parseInt(scanner.nextLine());
-                int numOfPeople;
+
                 if (people <= 9) {
                     numOfPeople = people;
                 } else {
                     System.out.println("Wrong input. Available number of persons is between 1-9");
                     continue;
                 }
-                String pool = reservationHelper.availableAsset("Pool included? 'Y': yes, 'N': no: ");
-                String evening_events = reservationHelper.availableAsset("Evening events included? 'Y': yes, 'N': no:");
-                String child_activities = reservationHelper.availableAsset("Child activities included? 'Y': yes, 'N': no:");
-                String restaurant = reservationHelper.availableAsset("Restaurant included? 'Y': yes, 'N': no:");
-                Double distance_to_beach = reservationHelper.setDistance("Enter desired distance to beach in meters (hit enter to skip):");
-                Double distance_to_centrum = reservationHelper.setDistance("Enter desired distance to centrum in meters(hit enter to skip): ");
-
-                statement = connect.prepareStatement(reservationHelper.sortBy());
-                statement.setInt(1, numOfPeople);
-                statement.setString(2, pool);
-                statement.setString(3, evening_events);
-                statement.setString(4, child_activities);
-                statement.setString(5, restaurant);
-                statement.setDouble(6, distance_to_beach);
-                statement.setDouble(7, distance_to_centrum);
-                statement.setString(8, checkInDate);
-                statement.setString(9, checkOutDate);
-                statement.setString(10, checkInDate);
-                statement.setString(11, checkOutDate);
-                statement.setString(12, checkInDate);
-                statement.setString(13, checkOutDate);
-                resultSet = statement.executeQuery();
-                reservationHelper.printRoomInformation(connect, statement, resultSet);
+                System.out.println("Filter search by extra assets? (NOTE: might return fewer results):");
+                System.out.println("[1] 'Y': Yes");
+                System.out.println("[2] 'N': No");
+                String filterSearch = scanner.nextLine();
+                if (filterSearch.toLowerCase().equals("y")) {
+                    filterSearch(connect, statement, resultSet);
+                } else {
+                    doNotFilterSearch(connect, statement, resultSet);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Error occurred, please try again.");
             }
-            System.out.println("Do you wish to proceed with this order? <ENTER>: yes, 'N': no");
+            System.out.println("Do you wish to proceed with this order? 'Y': yes, 'N': no");
             String proceedWithOrder = scanner.nextLine();
             if (proceedWithOrder.toLowerCase().equals("n")) {
                 isRunning = false;
@@ -84,6 +70,53 @@ public class SearchFilter {
                 bookRoom(connect, statement, resultSet);
                 isRunning = false;
             }
+        }
+    }
+
+    private void doNotFilterSearch(Connection connect, PreparedStatement statement, ResultSet resultSet) {
+        try {
+            statement = connect.prepareStatement(reservationHelper.sortUnfilteredSearch());
+            statement.setInt(1, numOfPeople);
+            statement.setString(2, checkInDate);
+            statement.setString(3, checkOutDate);
+            statement.setString(4, checkInDate);
+            statement.setString(5, checkOutDate);
+            statement.setString(6, checkInDate);
+            statement.setString(7, checkOutDate);
+            resultSet = statement.executeQuery();
+            reservationHelper.printRoomInformation(connect, statement, resultSet);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void filterSearch(Connection connect, PreparedStatement statement, ResultSet resultSet) {
+        try {
+            String pool = reservationHelper.availableAsset("Pool included? 'Y': yes, 'N': no: ");
+            String evening_events = reservationHelper.availableAsset("Evening events included? 'Y': yes, 'N': no:");
+            String child_activities = reservationHelper.availableAsset("Child activities included? 'Y': yes, 'N': no:");
+            String restaurant = reservationHelper.availableAsset("Restaurant included? 'Y': yes, 'N': no:");
+            Double distance_to_beach = reservationHelper.setDistance("Enter desired distance to beach in meters (hit enter to skip):");
+            Double distance_to_centrum = reservationHelper.setDistance("Enter desired distance to centrum in meters(hit enter to skip): ");
+
+            statement = connect.prepareStatement(reservationHelper.sortFilteredSearch());
+            statement.setInt(1, numOfPeople);
+            statement.setString(2, pool);
+            statement.setString(3, evening_events);
+            statement.setString(4, child_activities);
+            statement.setString(5, restaurant);
+            statement.setDouble(6, distance_to_beach);
+            statement.setDouble(7, distance_to_centrum);
+            statement.setString(8, checkInDate);
+            statement.setString(9, checkOutDate);
+            statement.setString(10, checkInDate);
+            statement.setString(11, checkOutDate);
+            statement.setString(12, checkInDate);
+            statement.setString(13, checkOutDate);
+            resultSet = statement.executeQuery();
+            reservationHelper.printRoomInformation(connect, statement, resultSet);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -99,16 +132,53 @@ public class SearchFilter {
         return trueOrFalse = 0;
     }
 
-    private void bookRoom(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
-        System.out.println("Enter ID for a room you wish to book:");
-        String roomId = scanner.nextLine();
-        registerBooking(connect, statement, resultSet);
-        getPrices(connect, statement, resultSet, roomId);
-        statement = connect.prepareStatement("INSERT INTO booked_rooms SET room_id = ?, booking_id = (SELECT MAX(id) FROM bookings), extra_bed = ?, meals = ?");
-        statement.setString(1, roomId);
-        statement.setInt(2, addBed());
-        statement.setString(3, addMeal());
-        statement.executeUpdate();
+    private void bookRoom(Connection connect, PreparedStatement statement, ResultSet resultSet) {
+        while (true) {
+            System.out.println("Enter ID for a room you wish to book:");
+            String roomId = scanner.nextLine();
+            int addExtraBed = addBed();
+            String addMeal = addMeal();
+            System.out.println("To make a reservation, enter client first name: ");
+            String firstName = scanner.nextLine();
+            System.out.println("Enter client phone number: ");
+            String phoneNumber = scanner.nextLine();
+            try {
+                statement = connect.prepareStatement("SELECT id FROM guests WHERE first_name = ? AND phone_number = ?");
+                statement.setString(1, firstName.toLowerCase());
+                statement.setString(2, phoneNumber);
+                resultSet = statement.executeQuery();
+                if (!resultSet.isBeforeFirst()) {
+                    System.out.println("Guest was not found. Please register a new guest.");
+                    break;
+                } else {
+                    String insertBooking = "INSERT INTO bookings " +
+                            "SET guest_id = (SELECT id FROM guests WHERE first_name = ? AND phone_number = ?)," +
+                            " checkin_date = ?," +
+                            " checkout_date = ?, " +
+                            "order_datetime = NOW()";
+                    statement = connect.prepareStatement(insertBooking);
+                    statement.setString(1, firstName.toLowerCase());
+                    statement.setString(2, phoneNumber);
+                    statement.setString(3, checkInDate);
+                    statement.setString(4, checkOutDate);
+                    statement.executeUpdate();
+                }
+                getPrices(connect, statement, resultSet, roomId);
+                statement = connect.prepareStatement("INSERT INTO booked_rooms SET room_id = ?, booking_id = (SELECT MAX(id) FROM bookings), extra_bed = ?, meals = ?");
+                statement.setString(1, roomId);
+                statement.setInt(2, addExtraBed);
+                statement.setString(3, addMeal);
+                statement.executeUpdate();
+                calculatePrice();
+                break;
+            } catch (Exception ex) {
+                System.out.println("There was an error, try again.");
+                break;
+            }
+        }
+    }
+
+    private void calculatePrice() {
         LocalDateTime checkIn = LocalDateTime.parse(checkInDate, DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm"));
         LocalDateTime checkout = LocalDateTime.parse(checkOutDate, DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm"));
         double numOfDays = ChronoUnit.DAYS.between(checkIn, checkout);
@@ -156,38 +226,5 @@ public class SearchFilter {
         fullBoardPrice = 0;
         halfBoardPrice = 0;
         return meal = "none";
-    }
-
-    private void registerBooking(Connection connect, PreparedStatement statement, ResultSet resultSet) throws SQLException {
-        System.out.println("To make a reservation, enter client first name: ");
-        String firstName = scanner.nextLine();
-        System.out.println("Enter client phone number: ");
-        String phoneNumber = scanner.nextLine();
-        try {
-            statement = connect.prepareStatement("SELECT id FROM guests WHERE first_name = ? AND phone_number = ?");
-            statement.setString(1, firstName.toLowerCase());
-            statement.setString(2, phoneNumber);
-            resultSet = statement.executeQuery();
-            if (!resultSet.isBeforeFirst()) {
-                System.out.println("Guest was not found. Register guest: ");
-                guestSettingsHelper.registerUser(connect, statement, resultSet);
-                searchRoomsAndAccommodations(connect, statement, resultSet);
-            } else {
-                String insertBooking = "INSERT INTO bookings " +
-                        "SET guest_id = (SELECT id FROM guests WHERE first_name = ? AND phone_number = ?)," +
-                        " checkin_date = ?," +
-                        " checkout_date = ?, " +
-                        "order_datetime = NOW()";
-                statement = connect.prepareStatement(insertBooking);
-                statement.setString(1, firstName.toLowerCase());
-                statement.setString(2, phoneNumber);
-                statement.setString(3, checkInDate);
-                statement.setString(4, checkOutDate);
-                statement.executeUpdate();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            System.out.println("There was an error, try again.");
-        }
     }
 }

@@ -130,29 +130,36 @@ public class ReservationSettings {
     }
 
     private void displayReservation(Connection connect, PreparedStatement statement, ResultSet resultSet) {
-        guestSettingsHelper.findGuestBookings(connect, statement, resultSet);
-        System.out.println("Select reservation ID you wish to update: ");
-        int updateReservation = Integer.parseInt(scanner.nextLine());
-        reservationId = updateReservation;
-        try {
-            statement = connect.prepareStatement("SELECT * FROM guest_bookings WHERE booking_id = ? ");
-            statement.setInt(1, updateReservation);
-            resultSet = statement.executeQuery();
 
-            while (resultSet.next()) {
-                String row = "Booking ID: " + resultSet.getString("booking_id")
-                        + ", Order Issued: " + resultSet.getString("order_datetime")
-                        + ", Check-In Date: " + resultSet.getString("checkin_date")
-                        + ", Check-Out Date: " + resultSet.getString("checkout_date")
-                        + ", Room Type: " + resultSet.getString("type")
-                        + ", Extra Bed: " + resultSet.getString("extra_bed")
-                        + ", Meals : " + resultSet.getString("meals")
-                        + ", Room Price: " + resultSet.getString("room_price") + "$";
-                System.out.println(row);
+        guestSettingsHelper.findGuestBookings(connect, statement, resultSet);
+        while (true) {
+            try {
+                System.out.println("Select reservation ID you wish to update ('N': to exit): ");
+                String updateOrExit = scanner.nextLine();
+                if (updateOrExit.toLowerCase().equals("n")) {
+                    break;
+                } else {
+                    int updateReservation = Integer.parseInt(updateOrExit);
+                    reservationId = updateReservation;
+                    statement = connect.prepareStatement("SELECT * FROM guest_bookings WHERE booking_id = ? ");
+                    statement.setInt(1, updateReservation);
+                    resultSet = statement.executeQuery();
+
+                    while (resultSet.next()) {
+                        String row = "Booking ID: " + resultSet.getString("booking_id")
+                                + ", Order Issued: " + resultSet.getString("order_datetime")
+                                + ", Check-In Date: " + resultSet.getString("checkin_date")
+                                + ", Check-Out Date: " + resultSet.getString("checkout_date")
+                                + ", Room Type: " + resultSet.getString("type")
+                                + ", Extra Bed: " + resultSet.getString("extra_bed")
+                                + ", Meals : " + resultSet.getString("meals")
+                                + ", Room Price: " + resultSet.getString("room_price") + "SEK";
+                        System.out.println(row);
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("There was an error, try again");
             }
-        } catch (Exception e) {
-            System.out.println("There was an error, try again");
         }
     }
-
 }
